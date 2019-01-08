@@ -1,4 +1,5 @@
 .PHONY=default clean ros build
+THIS_FILE := $(lastword $(MAKEFILE_LIST))
 
 SPECS=stage1.spec stage2.spec stage3.spec
 
@@ -9,7 +10,7 @@ default: $(SPECS)
 	@echo "Downloading $@  ..."
 
 clean: 
-	rm $(SPECS)
+	rm -f $(SPECS)
 
 # This has to be under %.spec because this one is built differently
 stage4.spec: $(SPECS)
@@ -20,3 +21,8 @@ ros: stage4.spec
 
 build: stage4.spec
 	@catalyst -f stage1.spec && catalyst -f stage2.spec && catalyst -f stage3.spec && catalyst -f stage4.spec
+
+update: 
+	@echo NOTE: This will only update stages 1-3, not 4
+	@$(MAKE) -f $(THIS_FILE) clean
+	@$(MAKE) -f $(THIS_FILE) default
