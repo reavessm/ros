@@ -7,14 +7,16 @@ default: $(SPECS)
 
 %.spec:
 	@wget -q -O $@ "https://gitweb.gentoo.org/proj/releng.git/plain/releases/weekly/specs/amd64/$@"
-	@echo "Downloading $@  ..."
+	@echo "Downloading $@ ..."
 
 clean: 
 	rm -f $(SPECS)
 
 # This has to be under %.spec because this one is built differently
 stage4.spec: $(SPECS)
-	@[ -f $@ ] || (echo "Copying stage3 -> stage4 ..." && cp stage3.spec $@ && sed -i 's/stage3/stage4/g; s/stage2/stage3/g' $@)
+	@[ -f $@ ] || (echo "Downloading $@ ..." && \
+			wget -q https://raw.githubusercontent.com/gentoo/catalyst/master/examples/stage4_template.spec \
+			-O $@)
 
 ros: stage4.spec
 	@vim stage4.spec
