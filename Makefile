@@ -1,6 +1,8 @@
 .PHONY=default clean ros build
 THIS_FILE := $(lastword $(MAKEFILE_LIST))
 
+# make seed && make snapshot && make build
+
 SPECS=stage1.spec stage2.spec stage3.spec
 
 default: $(SPECS)
@@ -21,10 +23,20 @@ stage4.spec: $(SPECS)
 ros: stage4.spec
 	@vim stage4.spec
 
-build: stage4.spec
-	@catalyst -f stage1.spec && catalyst -f stage2.spec && catalyst -f stage3.spec && catalyst -f stage4.spec
+build: stage4.spec seed snapshot
+	sudo sh -c "catalyst -f stage1.spec && sudo catalyst -f stage2.spec \
+	&& sudo catalyst -f stage3.spec && sudo catalyst -f stage4.spec"
 
 update: 
 	@echo NOTE: This will only update stages 1-3, not 4
 	@$(MAKE) -f $(THIS_FILE) clean
 	@$(MAKE) -f $(THIS_FILE) default
+
+snapshot:
+	sudo sh -c "emerge --sync && layman -S && catalyst -s latest"
+	touch snapshot
+
+seed:
+	sudo mkdir -p /var/tmp/catalyst/builds/default
+	sudo wget http://distfiles.gentoo.org/releases/amd64/autobuilds/current-stage3-amd64/stage3-amd64-20190108T214502Z.tar.xz -O /var/tmp/catalyst/builds/default/stage3-amd64-latest.tar.xz
+	touch seed
